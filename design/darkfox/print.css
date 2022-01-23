@@ -1,0 +1,59 @@
+/* Paragraphes */
+
+h2
+{
+	text-align:					left;
+}
+
+h3
+{
+	text-align:					left;
+}
+
+p
+{
+	width:						600px;
+	text-align:					justify;
+}
+
+img
+{
+	border:						1px;
+	border-color:				#000000;
+}
+
+ol
+{
+	list-style-type:			upper-roman;
+}
+
+table{
+	width:						700px;
+	border-bottom:				1px solid #000000;
+	border-right: 				1px solid #000000;
+	padding: 					0px;}
+
+tr.titre_1{
+	padding:					0px;
+	background:					#EEEEEE;}
+
+tr.titre_2{
+	padding:					0px;
+	background:					#DDDDDD;}
+
+tr{
+	padding:					0px;}
+
+td{
+	border-top:					1px solid #000000;
+	border-left:				1px solid #000000;
+	padding:					5px;
+	text-align:					left;
+	font-size:					12px;}
+
+body
+{
+	text-align:					left;
+	font-family:				Arial, Verdana, serif;
+	font-size:					14px;
+}

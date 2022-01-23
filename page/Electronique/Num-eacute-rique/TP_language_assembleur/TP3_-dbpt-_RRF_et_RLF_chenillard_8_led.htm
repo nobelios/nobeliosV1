@@ -1,0 +1,198 @@
+<h2>TP3 : Les instructions RRF et RLF - Chenillard 8 leds</h2>
+ 
+<h3>I. Objectifs du TP :</h3>
+
+<p>
+	L'objectif de ce Tp est de vous apprendre à utiliser les instructions RRF et RLF.
+	Vous devez savoir initialiser et configurer votre pic et vous devez également savoir crée
+	des fonctions.
+</p>
+
+<h3>II. Les instructions RRF et RLF :</h3>
+
+<p>
+	Les instructions RRF et RLF sont utilisées pour faire des multiplications, nous en parlerons
+	plus tard dans un autre TP.
+</p>
+<p>
+	RLF est l'abréviation de "Rotate Left through Carry" ou littéralement "rotation vers la gauche en utilisant le carry",
+	cette instruction comme elle l'indique utilise le bit C (Carry) du registre STATUS. Le bit C est accessible par 
+	le biais de la commande "xxx STATUS, C" où "xxx" correspond à une instruction comme par exemple BSF ou BCF. Il s'agit 
+	d'une opération de décalage sur 9 bits très utile. On compte 9 bits comme étant la somme des 8 bits de notre valeur, complementée
+	du bit C du registre STATUS.
+</p>
+<p>
+	La Procédure d'utilisation est la suivante :
+</p>
+
+<div align="left">
+<blockquote class="code">
+<pre>
+	<font class="instruction">bfs	</font><font class="variable">STATUS, C		</font><font class="commentaire">; positionnement de carry à 1</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'00100000'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">variable		</font><font class="commentaire">; initialisation de la variable</font>
+	<font class="instruction">rlf	</font><font class="variable">variable, f		</font><font class="commentaire">; rotation vers la gauche, resultat dans f</font>
+</pre>
+</blockquote>
+</div>
+
+<p>	
+	Ce que fait ce code est assez simple, la première ligne positionne le bit C à 1, la seconde charge la valeur binaire <strong>00100000</strong>
+	dans le registre de travail W (Work), puis on copie le contenu du registre W dans la variable <strong>variable</strong>.
+	A ce stade on a <strong>C=1</strong> et <strong>variable=00100000</strong>, la dernière ligne fait tourner les bits vers 
+	la gauche le bit C est copié dans le bit 0 de variable, le bit 0 de variable est copié dans le bit 1 de variable, ..., et le bit 7 est copié dans le carry.
+	Au final on a donc <strong>C=0</strong> et <strong>variable=01000001</strong>. Comme j'aime bien être totalement compris, j'ai fait un schéma.
+</p>
+
+<div align="center">
+	<img src="./Page/Electronique/Num-eacute-rique/TP_language_assembleur/TP3/TP3_asm_01.png" />
+</div>
+
+<p>
+	Pour l'instruction RRF elle fonctionne exactement de la même manière que RLF mais dans l'autre sens, donc avec <strong>C=1</strong> et <strong>variable=00100000</strong>
+	on trouve <strong>C=0</strong> et <strong>variable=10010000</strong> (imaginez le même schéma mais avec les flèches en sens inverse).
+	A présent je pense que vous êtes aptes à réaliser ce TP.
+</p>
+
+<h3>III. Programmation :</h3> 
+
+<p>
+	Ce que je vous demande est simple, vous allez faire tourner les bits de PORTB vers la gauche et placer le resultat obtenu sur PORTB.
+	Vous devez charger la valeur binaire <strong>00000001</strong> sur PORTB. Lors de l'initialisation le bit C doit être placé à <strong>0</strong>,
+	vous utiliserez une temporisation de 0,1 seconde.
+	Attention, n'oubliez pas que le bit C compte comme un neuvième bit et donc au moment ou il sera placé à 1 les 8 bits de PORTB seront à 0, ceci est
+	à prendre en compte.
+</p>
+
+<h3>IV. Montage et test :</h3>
+
+<div align="center">
+<blockquote>
+	<a target="blank" href="./Page/Electronique/Num-eacute-rique/TP_language_assembleur/TP3/TP3_asm_schema.jpg">
+	<img width="50%" src="./Page/Electronique/Num-eacute-rique/TP_language_assembleur/TP3/TP3_asm_schema.jpg" /></a>
+	<br />
+	Cliquez sur l'image pour afficher le schema en grand
+</blockquote>
+</div>
+
+<br />
+
+<div align="center">
+	<img src="./Page/Electronique/Num-eacute-rique/TP_language_assembleur/TP3/TP3_asm_02.jpg" />
+	<img src="./Page/Electronique/Num-eacute-rique/TP_language_assembleur/TP3/TP3_asm_03.jpg" />
+	<br />
+	<br />
+	<a href="./Page/Electronique/Num-eacute-rique/TP_language_assembleur/TP3/TP3_asm.avi">
+		Voir la vidéo du montage.
+	</a>
+</div>
+
+<h3>V. Solution :</h3>
+
+<p>
+	<u>La solution la plus optimisée reste d'utiliser les instructions de rotation RRF et RLF</u> :
+</p>
+
+<div align="left">
+<blockquote class="code">
+<pre>
+<font class="variable">init_led</font>
+	<font class="instruction">bcf	</font><font class="variable">STATUS, C		</font><font class="commentaire">; effacement du Carry</font>
+	<font class="instruction">movlw	</font><font class="nombre">0x01			</font><font class="commentaire">; RB0 est à 1 à l'initialisation</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB</font>
+	<font class="instruction">return</font>
+	
+<font class="variable">start</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">rlf	</font><font class="variable">PORTB, f		</font><font class="commentaire">; rotation de l'allumage des diodes</font>
+	<font class="instruction">btfsc	</font><font class="variable">STATUS, C		</font><font class="commentaire">; test si le bit Carry est à 1</font>
+	<font class="instruction">call	</font><font class="variable">init_led		</font><font class="commentaire">; oui, alors on réinitialise l'affichage</font>
+	<font class="instruction">goto	</font><font class="variable">start			</font><font class="commentaire">; non, alors on boucle</font>
+</pre>
+</blockquote>
+</div>
+
+<p>
+	Je test le bit C à chaque boucle, si il est à 1 je procède à une réinitialisation car je ne veut pas de blanc dans ma séquence. Avec un
+	temps de 2 secondes par exemple vous voyez très facilement qu'à un moment TOUTES les del sont éteintes. C'est ce qui arrive quand le bit
+	C est placé à 1 et tout les autres à 0 et c'est aussi la raison pour laquelle je vous ai dit qu'il fallait tenir compte du bit C comme d'un
+	neuvième bit.
+</p>
+
+<p>
+	<u>Ce que vous ne devez jamais faire</u> :
+</p>
+
+<div align="left">
+<blockquote class="code">
+<pre>
+<font class="variable">start</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'00000001'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB0 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'00000010'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB1 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'00000100'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB2 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'00001000'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB3 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'00010000'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB4 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'00100000'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB5 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'01000000'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB6 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">movlw	</font><font class="nombre">B'10000000'		</font><font class="commentaire">; chargement de la valeur dans W</font>
+	<font class="instruction">movwf	</font><font class="variable">PORTB			</font><font class="commentaire">; allumage del RB7 seule</font>
+	<font class="instruction">movlw	</font><font class="nombre">D'1'			</font><font class="commentaire">; retard de 0,1 secondes</font>
+	<font class="instruction">call	</font><font class="variable">temp100ms		</font>
+	<font class="instruction">goto	</font><font class="variable">start			</font><font class="commentaire">; on boucle le programme</font>
+</pre>
+</blockquote>
+</div>
+
+<p>
+	En gros ca revient à écraser une mouche avec un char, c'est gourmand en mémoire, et ça nous fait perdre du temps. 
+	Imaginez que vous voulez intercaler une instruction, vous allez devoir copier des lignes et des lignes de codes
+	et perdre encore plus de place dans votre PIC. Notez que j'ai moi même perdu mon temps pour vous montrer ça, 
+	vous pouvez tout de même charger ce code pour voir qu'il fonctionne également.
+</p>
+<p>
+	Voici les fichiers utilisés dans ce TP :
+</p>
+<p>
+	<a href="./Page/Electronique/Num-eacute-rique/TP_language_assembleur/TP3/TP3_asm.rar">
+		Télécharger tout les documents du TP3 corrigé, la vidéo du montage ainsi que le TP en format PDF.
+	</a>
+</p>
+
+<h3>VI. Le mot de la fin :</h3>
+
+<p>
+	Je vous conseil vivement de faire des petites expériences avec le bit C et par exemple en utilisant les 
+	incrémentations et décrémentations, etc, afin de créer des effets de lumière. C'est avec beaucoup pratique que vous apprendrez,
+	je parle par expérience personnelle.
+	<br />
+	Je doit également remercier bigonoff pour ses cours de bonne qualité et surtout totalement gratuits.
+	En dehors de ses idées politiques que je ne soutient pas forcement, il est le seule à avoir écrit des cours lisibles, complets,
+	gratuits et en français sur la programmation des pic en assembleur. Voici sa page web, n'hésitez pas à aller télécharger ses cours 
+	de temps en temps car il les met à jours assez souvent. Pour ma part j'ai imprimé les deux premiers pdf en intégralité, et je 
+	consulte son site de temps à autre.
+</p>
+<p>
+	<a target="blank" href="http://www.abcelectronique.com/bigonoff/">http://www.abcelectronique.com/bigonoff/</a>
+</p>

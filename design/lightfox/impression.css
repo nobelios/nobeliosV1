@@ -1,0 +1,32 @@
+/* Paragraphes */
+
+h2
+{
+	text-align: center;
+}
+
+h3
+{
+}
+
+p
+{
+	width: 600px;
+	text-align: justify;
+}
+
+img
+{
+	border: 1px;
+	border-color: #000000;
+}
+
+ol
+{
+	list-style-type: upper-roman;
+}
+
+body
+{
+	text-align: center
+}
